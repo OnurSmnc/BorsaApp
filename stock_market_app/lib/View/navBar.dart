@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:stock_market_app/View/Wallet.dart';
 import 'package:stock_market_app/View/borsaIstanbul.dart';
 import 'package:stock_market_app/View/currencyExchange.dart';
 import 'package:stock_market_app/View/gold.dart';
 import 'package:stock_market_app/View/home.dart';
+import 'package:stock_market_app/model/wallet.dart';
 
 class NavBar extends StatefulWidget {
   const NavBar({super.key});
@@ -19,6 +21,7 @@ class _NavBarState extends State<NavBar> {
     BorsaIstanbul(),
     GoldPage(),
     CurrencyExchange(),
+    WalletPage(),
   ];
 
   @override
@@ -71,6 +74,12 @@ class _NavBarState extends State<NavBar> {
                   color: Colors.white,
                 ),
                 label: 'Döviz'),
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.wallet,
+                  color: Colors.white,
+                ),
+                label: 'Cüzdan'),
           ],
         ),
       ),

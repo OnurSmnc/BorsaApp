@@ -32,6 +32,9 @@ dependencies:
     sdk: flutter
   http: ^0.13.3
   rounded_background_text: ^0.5.0
+  hive: 
+  hive_flutter: 
+  path_provider:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -40,6 +43,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: 
+  hive_generator: 
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

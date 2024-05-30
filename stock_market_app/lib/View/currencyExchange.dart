@@ -2,7 +2,9 @@ import 'dart:collection';
 import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:stock_market_app/View/widgets/mostValueCurrencies.dart';
+import 'package:stock_market_app/View/Wallet.dart';
+import 'package:stock_market_app/View/myInvestments.dart';
+import 'package:stock_market_app/View/widgets/mostChangedCard/mostValueCurrencies.dart';
 import 'dart:convert';
 import 'package:stock_market_app/utils/currencyKey.dart';
 
@@ -14,6 +16,7 @@ class CurrencyExchange extends StatefulWidget {
 }
 
 class _CurrencyExchangeState extends State<CurrencyExchange> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late Map<String, num> _exchangeRates = {};
   bool _isLoading = true;
   TextEditingController _searchController = TextEditingController();
@@ -80,14 +83,96 @@ class _CurrencyExchangeState extends State<CurrencyExchange> {
         .toList();
     return SafeArea(
       child: Scaffold(
+        key: _scaffoldKey,
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
           title: Text(
             'DÖVİZ',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                _scaffoldKey.currentState?.openDrawer();
+              },
+              icon: Icon(Icons.menu),
+              color: Colors.white,
+            ),
+          ],
           backgroundColor: Colors.black,
           centerTitle: true,
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 23, 23, 23),
+                ),
+                child: Center(
+                  child: Text(
+                    'Borsa Cebinde',
+                    style: TextStyle(
+                        fontSize: 35,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              ListTile(
+                title: Row(
+                  children: [
+                    Icon(Icons.wallet),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    const Text('Cüzdanım')
+                  ],
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WalletPage(),
+                    ),
+                  );
+                },
+              ),
+              Divider(),
+              ListTile(
+                title: Row(
+                  children: [
+                    Icon(Icons.money),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    const Text('Yatırımlarım')
+                  ],
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MyInvestmentsPage(),
+                    ),
+                  );
+                },
+              ),
+              Divider(),
+              Container(
+                margin: EdgeInsets.all(20),
+              ),
+              Image.asset('assets/icons/pngwing.com.png'),
+            ],
+          ),
         ),
         body: Container(
           height: myHeight,

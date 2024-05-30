@@ -3,11 +3,17 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:rounded_background_text/rounded_background_text.dart';
+import 'package:stock_market_app/View/Wallet.dart';
 import 'package:stock_market_app/View/addMonetWallet.dart';
-import 'package:stock_market_app/View/widgets/mostChangedBorsa.dart';
+import 'package:stock_market_app/View/myInvestments.dart';
+import 'package:stock_market_app/View/widgets/appBar/appBar.dart';
+import 'package:stock_market_app/View/widgets/mostChangedCard/mostChangedBorsa.dart';
 import 'package:hive/hive.dart';
+import 'package:stock_market_app/model/investment.dart';
 import 'package:stock_market_app/model/wallet.dart';
+import 'package:stock_market_app/services/investment_service.dart';
 import 'package:stock_market_app/services/wallet_service.dart';
+import 'package:stock_market_app/View/widgets/investmentsAdd/addInvestment.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,6 +23,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late List<dynamic> _data = [];
   late double _walletAmount = 0.0;
   Future<void> _getData() async {
@@ -34,51 +41,6 @@ class _HomeState extends State<Home> {
     } else {
       throw Exception('Failed to load data');
     }
-  }
-
-  void showInvestDialog(
-      BuildContext context, String currencyCode, double value) {
-    String enteredAmount =
-        ''; // Kullanıcının girdiği miktarı saklamak için bir değişken
-
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Ne kadar $currencyCode yatırmak istersiniz?',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Miktar',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (String input) {
-                  enteredAmount = input; // Kullanıcının girdiği miktarı sakla
-                },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Para yatırma işlemini gerçekleştir
-                  double amount = double.tryParse(enteredAmount) ?? 0.0;
-                  // investToBorsa(currencyCode, amount);
-                  Navigator.of(context).pop(); // Bottom sheet'i kapat
-                },
-                child: Text('Onayla'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -101,10 +63,20 @@ class _HomeState extends State<Home> {
     }
   }
 
+  double getDegisimYuzde(String name) {
+    var item = _data.firstWhere((element) => element['name'] == name);
+    if (item != null) {
+      return _parseDegisim(item['change']);
+    } else {
+      throw Exception('Investment Not Found');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double myHeight = MediaQuery.of(context).size.height;
     double myWidht = MediaQuery.of(context).size.width;
+    bool isDrawerOpen = false;
 
     _data.sort((a, b) => a['name'].compareTo(b['name']));
 
@@ -122,39 +94,73 @@ class _HomeState extends State<Home> {
 
     mostChanged = mostChanged.take(10).toList();
     return Scaffold(
+      key: _scaffoldKey,
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          color: Colors.white, // Change this to your desired color
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      appBar: MyAppBar(scaffoldKey: _scaffoldKey, page: 'Borsa', data: _data),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            Text(
-              'BORSA',
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 23, 23, 23),
+              ),
+              child: Center(
+                child: Text(
+                  'Borsa Cebinde',
+                  style: TextStyle(
+                      fontSize: 35,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.wallet),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  const Text('Cüzdanım')
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WalletPage(),
+                  ),
+                );
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.money),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  const Text('Yatırımlarım')
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyInvestmentsPage(),
+                  ),
+                );
+              },
+            ),
+            Divider(),
+            Container(
+              margin: EdgeInsets.all(20),
+            ),
+            Image.asset('assets/icons/pngwing.com.png'),
           ],
         ),
-        backgroundColor: Colors.black,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                showSearch(
-                  context: context,
-                  delegate: mySearch(data: _data),
-                );
-              });
-            },
-            icon: const Icon(Icons.search),
-            color: Colors.white,
-          ),
-        ],
       ),
       body: Container(
         height: myHeight,
@@ -192,9 +198,19 @@ class _HomeState extends State<Home> {
                         itemBuilder: (context, index) {
                           var item = _data[index];
                           var degisim = _parseDegisim(item['change']);
-                          return GestureDetector(
-                            onTap: () {
-                              showInvestDialog(context, item, item['price']);
+                          return InkWell(
+                            onTap: () => {
+                              showInvestDialog(
+                                  context,
+                                  item['name'],
+                                  double.parse(item['price']
+                                      .replaceAll(',', '.')
+                                      .trim()))
+                            },
+                            onFocusChange: (value) => {
+                              setState(() {
+                                Colors.grey;
+                              })
                             },
                             child: Card(
                               margin: EdgeInsets.symmetric(

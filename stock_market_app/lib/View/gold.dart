@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:rounded_background_text/rounded_background_text.dart';
-import 'package:stock_market_app/View/widgets/mostChanged.dart';
+import 'package:stock_market_app/View/Wallet.dart';
+import 'package:stock_market_app/View/myInvestments.dart';
+import 'package:stock_market_app/View/widgets/appBar/appBar.dart';
+import 'package:stock_market_app/View/widgets/mostChangedCard/mostChanged.dart';
+
+import 'widgets/investmentsAdd/addGoldInvestment.dart';
 
 class GoldPage extends StatefulWidget {
   const GoldPage({super.key});
@@ -12,6 +17,7 @@ class GoldPage extends StatefulWidget {
 }
 
 class _GoldPageState extends State<GoldPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late List<dynamic> _data = [];
 
   Future<void> _getData() async {
@@ -72,27 +78,73 @@ class _GoldPageState extends State<GoldPage> {
     mostChanged = mostChanged.take(4).toList();
 
     return Scaffold(
-      appBar: AppBar(
-          title: Text(
-            'ALTIN',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: Colors.black,
-          centerTitle: true,
-          actions: [
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  showSearch(
-                    context: context,
-                    delegate: mySearch(data: _data),
-                  );
-                });
-              },
-              icon: const Icon(Icons.search),
-              color: Colors.white,
+      key: _scaffoldKey,
+      appBar: MyAppBar(scaffoldKey: _scaffoldKey, page: 'Altın', data: _data),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 23, 23, 23),
+              ),
+              child: Center(
+                child: Text(
+                  'Borsa Cebinde',
+                  style: TextStyle(
+                      fontSize: 35,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-          ]),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.wallet),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  const Text('Cüzdanım')
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WalletPage(),
+                  ),
+                );
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.money),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  const Text('Yatırımlarım')
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyInvestmentsPage(),
+                  ),
+                );
+              },
+            ),
+            Divider(),
+            Container(
+              margin: EdgeInsets.all(20),
+            ),
+            Image.asset('assets/icons/pngwing.com.png'),
+          ],
+        ),
+      ),
       body: Container(
         height: myHeight,
         width: myWidht,
@@ -128,53 +180,62 @@ class _GoldPageState extends State<GoldPage> {
                         itemBuilder: (context, index) {
                           var item = _data[index];
                           var degisim = _parseDegisim(item['Degisim']);
-                          return Card(
-                            margin: EdgeInsets.symmetric(
-                                vertical: 2, horizontal: 2),
-                            color: Color.fromARGB(255, 23, 23, 23),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            child: ListTile(
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    children: [
-                                      Text(
-                                        item['name'],
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white),
-                                      ),
-                                      SizedBox(width: 8),
-                                      RoundedBackgroundText(
-                                        'Değişim: ${item['Degisim']}',
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            backgroundColor: degisim < 0
-                                                ? Colors.red
-                                                : Colors.green,
-                                            color: Colors.white),
-                                        innerRadius: 15.0,
-                                        outerRadius: 10.0,
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        'Alış: ${item['Alis']}',
-                                        style: TextStyle(
-                                            fontSize: 15, color: Colors.white),
-                                      ),
-                                      Text(
-                                        'Satış: ${item['Satis']}',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                          double? amountNullable = double.tryParse(
+                              item['Alis'].replaceAll(RegExp(r'[^0-9.]'), ''));
+                          double amount = amountNullable ?? 0.0;
+                          return InkWell(
+                            onTap: () => {
+                              showInvestDialog(context, item['name'], amount)
+                            },
+                            child: Card(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 2, horizontal: 2),
+                              color: Color.fromARGB(255, 23, 23, 23),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: ListTile(
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      children: [
+                                        Text(
+                                          item['name'],
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        ),
+                                        SizedBox(width: 8),
+                                        RoundedBackgroundText(
+                                          'Değişim: ${item['Degisim']}',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              backgroundColor: degisim < 0
+                                                  ? Colors.red
+                                                  : Colors.green,
+                                              color: Colors.white),
+                                          innerRadius: 15.0,
+                                          outerRadius: 10.0,
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          'Alış: ${item['Alis']}',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.white),
+                                        ),
+                                        Text(
+                                          'Satış: ${item['Satis']}',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -189,10 +250,10 @@ class _GoldPageState extends State<GoldPage> {
   }
 }
 
-class mySearch extends SearchDelegate {
+class mySearchGold extends SearchDelegate {
   final List<dynamic> data;
 
-  mySearch({required this.data});
+  mySearchGold({required this.data});
 
   @override
   List<Widget>? buildActions(BuildContext context) {

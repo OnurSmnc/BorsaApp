@@ -3,8 +3,16 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:rounded_background_text/rounded_background_text.dart';
+import 'package:stock_market_app/View/Wallet.dart';
+import 'package:stock_market_app/View/myInvestments.dart';
+import 'package:stock_market_app/View/widgets/appBar/appBar.dart';
+import 'package:stock_market_app/model/investment.dart';
+import 'package:stock_market_app/model/wallet.dart';
+import 'package:stock_market_app/services/investment_service.dart';
+import 'package:stock_market_app/services/wallet_service.dart';
+import 'package:stock_market_app/View/widgets/investmentsAdd/addInvestment.dart';
 
-import 'package:stock_market_app/View/widgets/mostChangedBorsaIstanbul.dart';
+import 'package:stock_market_app/View/widgets/mostChangedCard/mostChangedBorsaIstanbul.dart';
 
 class BorsaIstanbul extends StatefulWidget {
   const BorsaIstanbul({super.key});
@@ -14,6 +22,8 @@ class BorsaIstanbul extends StatefulWidget {
 }
 
 class _BorsaIstanbulState extends State<BorsaIstanbul> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   late List<dynamic> _data = [];
   Future<void> _getData() async {
     final response =
@@ -65,27 +75,73 @@ class _BorsaIstanbulState extends State<BorsaIstanbul> {
 
     mostChanged = mostChanged.take(10).toList();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'BORSA İSTANBUL',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: Colors.black,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                showSearch(
-                  context: context,
-                  delegate: mySearch(data: _data),
+      key: _scaffoldKey,
+      appBar: MyAppBar(
+          scaffoldKey: _scaffoldKey, page: 'Borsaİstanbul', data: _data),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 23, 23, 23),
+              ),
+              child: Center(
+                child: Text(
+                  'Borsa Cebinde',
+                  style: TextStyle(
+                      fontSize: 35,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.wallet),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  const Text('Cüzdanım')
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WalletPage(),
+                  ),
                 );
-              });
-            },
-            icon: const Icon(Icons.search),
-            color: Colors.white,
-          ),
-        ],
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Row(
+                children: [
+                  Icon(Icons.money),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  const Text('Yatırımlarım')
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyInvestmentsPage(),
+                  ),
+                );
+              },
+            ),
+            Divider(),
+            Container(
+              margin: EdgeInsets.all(20),
+            ),
+            Image.asset('assets/icons/pngwing.com.png'),
+          ],
+        ),
       ),
       body: Container(
         height: myHeight,
@@ -122,6 +178,7 @@ class _BorsaIstanbulState extends State<BorsaIstanbul> {
                         itemBuilder: (context, index) {
                           var item = _data[index];
                           var degisim = _parseDegisim(item['percent']);
+
                           return Card(
                             margin: EdgeInsets.symmetric(
                                 vertical: 2, horizontal: 2),
@@ -189,10 +246,10 @@ class _BorsaIstanbulState extends State<BorsaIstanbul> {
   }
 }
 
-class mySearch extends SearchDelegate {
+class mySearchIst extends SearchDelegate {
   final List<dynamic> data;
 
-  mySearch({required this.data});
+  mySearchIst({required this.data});
 
   @override
   List<Widget>? buildActions(BuildContext context) {

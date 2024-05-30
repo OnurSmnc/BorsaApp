@@ -64,7 +64,7 @@ class _WalletPageState extends State<WalletPage> {
               Card(
                 elevation: 5,
                 margin: EdgeInsets.all(20),
-                color: Colors.green,
+                color: Color.fromARGB(255, 23, 23, 23),
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: Column(
@@ -96,9 +96,9 @@ class _WalletPageState extends State<WalletPage> {
                 },
                 child: Text(
                   'Para Yatır',
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.white),
                 ),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
               ),
             ],
           ),

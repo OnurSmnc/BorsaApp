@@ -13,4 +13,12 @@ class WalletService {
     var walletBox = await Hive.openBox<Wallet>(walletBoxName);
     await walletBox.put(0, wallet);
   }
+
+  Future<bool> addToWallet(double amount) async {
+    var walletBox = await Hive.openBox<Wallet>(walletBoxName);
+    Wallet wallet = walletBox.get(0) ?? Wallet(amount: 0.0);
+    wallet.amount += amount;
+    await WalletService.saveWallet(wallet);
+    return true;
+  }
 }

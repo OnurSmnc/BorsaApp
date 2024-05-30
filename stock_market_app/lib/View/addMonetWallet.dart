@@ -46,11 +46,20 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Miktar',
-                  ),
+                      labelText: 'Miktar',
+                      labelStyle: TextStyle(color: Colors.black),
+                      border: UnderlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black, width: 1)),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      )),
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white),
                   onPressed: () {
                     double amount =
                         double.tryParse(_amountController.text) ?? 0.0;

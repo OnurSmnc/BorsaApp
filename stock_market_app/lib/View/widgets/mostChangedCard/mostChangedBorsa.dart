@@ -162,11 +162,32 @@ class MostChangedBorsa extends StatelessWidget {
                     itemBuilder: (context, index) {
                       var item = mostChanged[index];
                       return InkWell(
-                        onTap: () => {
-                          showInvestDialog(
-                            context,
-                            item['name'],
-                          )
+                        onTap: () async {
+                          List<Investment> invs =
+                              await InvestmentService().getInvestments();
+                          bool invsExist =
+                              invs.any((a) => a.currencyCode == item['name']);
+                          if (!invsExist) {
+                            showInvestDialog(
+                              context,
+                              item['name'],
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: Colors.red,
+                                content: Center(
+                                  child: Text(
+                                    'Bu firmaya yatırımınız mevcut!',
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
                         },
                         child: Container(
                           width: myWidth * 0.5,

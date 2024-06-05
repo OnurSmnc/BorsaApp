@@ -36,6 +36,7 @@ class InvestmentService {
 
       var wallet = await WalletService.getWallet();
       if (wallet != null) {
+        
         wallet.amount += investment.amount;
         await WalletService.saveWallet(wallet);
       } else {}

@@ -252,10 +252,16 @@ class mySearchIst extends SearchDelegate {
   mySearchIst({required this.data});
 
   @override
+  String? get searchFieldLabel => 'Ara...';
+
+  @override
   List<Widget>? buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: Icon(
+          Icons.clear,
+          color: Colors.black,
+        ),
         onPressed: () {
           query = '';
         },
@@ -266,7 +272,10 @@ class mySearchIst extends SearchDelegate {
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back),
+      icon: Icon(
+        Icons.arrow_back,
+        color: Colors.black,
+      ),
       onPressed: () {
         close(context, null);
       },
@@ -333,8 +342,14 @@ class mySearchIst extends SearchDelegate {
       itemBuilder: (context, index) {
         var item = suggestions[index];
         var degisim = double.parse(item['percent'].replaceAll(',', '.').trim());
-        return ListTile(
-          subtitle: Row(
+        return Card(
+          margin: EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+          color: Color.fromARGB(255, 23, 23, 23),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: ListTile(
+              subtitle: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
@@ -342,12 +357,12 @@ class mySearchIst extends SearchDelegate {
                   Text(
                     item['name'],
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.black),
+                        fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   // Add spacing between title and subtitle
                   Text(
                     'En son Fiyat: ${item['last']}',
-                    style: TextStyle(fontSize: 15, color: Colors.black),
+                    style: TextStyle(fontSize: 15, color: Colors.white),
                   ),
                   Text(
                     'Değişim: ${degisim}',
@@ -369,16 +384,12 @@ class mySearchIst extends SearchDelegate {
                   ),
                   Text(
                     'En Düşük: ${item['low']}',
-                    style: TextStyle(fontSize: 15, color: Colors.black),
+                    style: TextStyle(fontSize: 15, color: Colors.white),
                   ),
                 ],
               ),
             ],
-          ),
-          onTap: () {
-            query = item['name'];
-            showResults(context);
-          },
+          )),
         );
       },
     );

@@ -199,18 +199,35 @@ class _HomeState extends State<Home> {
                           var item = _data[index];
                           var degisim = _parseDegisim(item['change']);
                           return InkWell(
-                            onTap: () => {
-                              showInvestDialog(
-                                  context,
-                                  item['name'],
-                                  double.parse(item['price']
-                                      .replaceAll(',', '.')
-                                      .trim()))
-                            },
-                            onFocusChange: (value) => {
-                              setState(() {
-                                Colors.grey;
-                              })
+                            onTap: () async {
+                              List<Investment> invs =
+                                  await InvestmentService().getInvestments();
+                              bool investmentExists = invs.any(
+                                  (inv) => inv.currencyCode == item['name']);
+
+                              if (!investmentExists) {
+                                showInvestDialog(
+                                    context,
+                                    item['name'],
+                                    double.parse(item['price']
+                                        .replaceAll(',', '.')
+                                        .trim()));
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Center(
+                                      child: Text(
+                                        'Bu firmaya yatırımınız mevcut!',
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
                             },
                             child: Card(
                               margin: EdgeInsets.symmetric(
@@ -252,8 +269,7 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                           );
-                        },
-                      ),
+                        }),
               ),
             ),
           ],
@@ -269,10 +285,15 @@ class mySearch extends SearchDelegate {
   mySearch({required this.data});
 
   @override
+  String? get searchFieldLabel => 'Ara...';
+  @override
   List<Widget>? buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: Icon(
+          Icons.clear,
+          color: Colors.black,
+        ),
         onPressed: () {
           query = '';
         },
@@ -283,7 +304,10 @@ class mySearch extends SearchDelegate {
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back),
+      icon: Icon(
+        Icons.arrow_back,
+        color: Colors.black,
+      ),
       onPressed: () {
         close(context, null);
       },
@@ -350,29 +374,60 @@ class mySearch extends SearchDelegate {
       itemBuilder: (context, index) {
         var item = suggestions[index];
         var degisim = double.parse(item['change'].replaceAll(',', '.').trim());
-        return ListTile(
-          title: Text(
-            item['name'],
-            style: TextStyle(color: Colors.black),
-          ),
-          subtitle: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Değişim: ${item['change']} ',
-                style:
-                    TextStyle(color: degisim < 0 ? Colors.red : Colors.green),
-              ),
-              Text(
-                "Fiyat: ${item['price']}",
-                style: TextStyle(color: Colors.black),
-              )
-            ],
-          ),
-          onTap: () {
-            query = item['name'];
-            showResults(context);
+        return InkWell(
+          onTap: () async {
+            List<Investment> invs = await InvestmentService().getInvestments();
+            bool investmentExists =
+                invs.any((inv) => inv.currencyCode == item['name']);
+
+            if (!investmentExists) {
+              showInvestDialog(context, item['name'],
+                  double.parse(item['price'].replaceAll(',', '.').trim()));
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.red,
+                  content: Center(
+                    child: Text(
+                      'Bu firmaya yatırımınız mevcut!',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
           },
+          child: Card(
+            margin: EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+            color: Color.fromARGB(255, 23, 23, 23),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ListTile(
+              title: Text(
+                item['name'],
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Değişim: ${item['change']} ',
+                    style: TextStyle(
+                        backgroundColor:
+                            degisim < 0 ? Colors.red : Colors.green,
+                        color: Colors.white),
+                  ),
+                  Text(
+                    "Fiyat: ${item['price']}",
+                    style: TextStyle(color: Colors.white),
+                  )
+                ],
+              ),
+            ),
+          ),
         );
       },
     );

@@ -256,10 +256,16 @@ class mySearchGold extends SearchDelegate {
   mySearchGold({required this.data});
 
   @override
+  String? get searchFieldLabel => 'Ara...';
+
+  @override
   List<Widget>? buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: Icon(
+          Icons.clear,
+          color: Colors.black,
+        ),
         onPressed: () {
           query = '';
         },
@@ -270,7 +276,10 @@ class mySearchGold extends SearchDelegate {
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back),
+      icon: Icon(
+        Icons.arrow_back,
+        color: Colors.black,
+      ),
       onPressed: () {
         close(context, null);
       },
@@ -353,33 +362,44 @@ class mySearchGold extends SearchDelegate {
         var item = suggestions[index];
         var degisim = double.parse(
             item['Degisim'].replaceAll('%', '').replaceAll(',', '.').trim());
-        return ListTile(
-          title: Text(
-            item['name'],
-            style: TextStyle(color: Colors.black),
+        double? amountNullable =
+            double.tryParse(item['Alis'].replaceAll(RegExp(r'[^0-9.]'), ''));
+        double amount = amountNullable ?? 0.0;
+        return InkWell(
+          onTap: () => showInvestDialog(context, item['name'], amount),
+          child: Card(
+            margin: EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+            color: Color.fromARGB(255, 23, 23, 23),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ListTile(
+              title: Text(
+                item['name'],
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Değişim: ${item['Degisim']} ',
+                    style: TextStyle(
+                        backgroundColor:
+                            degisim < 0 ? Colors.red : Colors.green,
+                        color: Colors.white),
+                  ),
+                  Text(
+                    'Alış: ${item['Alis']}',
+                    style: TextStyle(fontSize: 15, color: Colors.white),
+                  ),
+                  Text(
+                    'Satış: ${item['Satis']}',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
           ),
-          subtitle: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Değişim: ${item['Degisim']} ',
-                style:
-                    TextStyle(color: degisim < 0 ? Colors.red : Colors.green),
-              ),
-              Text(
-                'Alış: ${item['Alis']}',
-                style: TextStyle(fontSize: 15, color: Colors.black),
-              ),
-              Text(
-                'Satış: ${item['Satis']}',
-                style: TextStyle(color: Colors.black),
-              ),
-            ],
-          ),
-          onTap: () {
-            query = item['name'];
-            showResults(context);
-          },
         );
       },
     );
